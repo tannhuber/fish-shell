@@ -2232,7 +2232,7 @@ static int builtin_read(parser_t &parser, wchar_t **argv)
     const wchar_t *commandline = L"";
     int exit_res=STATUS_BUILTIN_OK;
     const wchar_t *mode_name = READ_MODE_NAME;
-    int nchars=1;
+    int nchars=0;
     wchar_t *end;
     int shell = 0;
 
