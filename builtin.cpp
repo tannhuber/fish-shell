@@ -423,7 +423,7 @@ static void builtin_bind_list(const wchar_t *bind_mode)
         {
             continue;
         }
-        
+
         // Append the initial 'bind' command and the name
         wcstring tname;
         if (input_terminfo_get_name(seq, &tname))
@@ -437,7 +437,7 @@ static void builtin_bind_list(const wchar_t *bind_mode)
             const wcstring eseq = escape_string(seq, 1);
             append_format(stdout_buffer, L"bind %ls", eseq.c_str());
         }
-        
+
         // Now show the list of commands
         for (size_t i = 0; i < ecmds.size(); i++)
         {
@@ -1640,13 +1640,13 @@ static int builtin_echo(parser_t &parser, wchar_t **argv)
             // We must have at least two characters to be a valid option, and have consumed the whole string
             arg_is_valid_option = (i >= 2 && arg[i] == L'\0');
         }
-        
+
         if (! arg_is_valid_option)
         {
             // This argument is not an option, so there are no more options
             break;
         }
-        
+
         // Ok, we are sure the argument is an option. Parse it.
         assert(arg_is_valid_option);
         for (size_t i=1; arg[i] != L'\0'; i++)
@@ -1674,7 +1674,7 @@ static int builtin_echo(parser_t &parser, wchar_t **argv)
 
     /* The special character \c can be used to indicate no more output */
     bool continue_output = true;
-    
+
     /* Skip over the options */
     const wchar_t * const *args_to_echo = argv + option_idx;
     for (size_t idx = 0; continue_output && args_to_echo[idx] != NULL; idx++)
@@ -1809,7 +1809,7 @@ int define_function(parser_t &parser, const wcstring_list_t &c_args, const wcstr
     bool shadows = true;
 
     woptind=0;
-    
+
     wcstring_list_t wrap_targets;
 
     const struct woption long_options[] =
@@ -1982,7 +1982,7 @@ int define_function(parser_t &parser, const wcstring_list_t &c_args, const wcstr
             case 'S':
                 shadows = 0;
                 break;
-                
+
             case 'w':
                 wrap_targets.push_back(woptarg);
                 break;
@@ -2093,7 +2093,7 @@ int define_function(parser_t &parser, const wcstring_list_t &c_args, const wcstr
         d.definition = contents.c_str();
 
         function_add(d, parser, definition_line_offset);
-        
+
         // Handle wrap targets
         for (size_t w=0; w < wrap_targets.size(); w++)
         {
@@ -2232,6 +2232,8 @@ static int builtin_read(parser_t &parser, wchar_t **argv)
     const wchar_t *commandline = L"";
     int exit_res=STATUS_BUILTIN_OK;
     const wchar_t *mode_name = READ_MODE_NAME;
+    int nchars=1;
+    wchar_t *end;
     int shell = 0;
 
     woptind=0;
@@ -2274,6 +2276,10 @@ static int builtin_read(parser_t &parser, wchar_t **argv)
             }
             ,
             {
+                L"nchars", required_argument, 0, 'n'
+            }
+            ,
+            {
                 L"shell", no_argument, 0, 's'
             }
             ,
@@ -2291,7 +2297,7 @@ static int builtin_read(parser_t &parser, wchar_t **argv)
 
         int opt = wgetopt_long(argc,
                                argv,
-                               L"xglUup:c:hm:s",
+                               L"xglUup:c:hmn:s",
                                long_options,
                                &opt_index);
         if (opt == -1)
@@ -2340,6 +2346,10 @@ static int builtin_read(parser_t &parser, wchar_t **argv)
 
             case L'm':
                 mode_name = woptarg;
+                break;
+
+            case L'n':
+                nchars = fish_wcstoi(woptarg, &end, 10);
                 break;
 
             case 's':
@@ -2409,7 +2419,7 @@ static int builtin_read(parser_t &parser, wchar_t **argv)
     i=woptind;
 
     /*
-      Check if we should read interactively using \c reader_readline()
+      Check if we should read interactively using \c reader_readline(nchars)
     */
     if (isatty(0) && builtin_stdin == 0)
     {
@@ -2432,7 +2442,7 @@ static int builtin_read(parser_t &parser, wchar_t **argv)
         proc_push_interactive(1);
 
         event_fire_generic(L"fish_prompt");
-        line = reader_readline();
+        line = reader_readline(nchars);
         proc_pop_interactive();
         if (line)
         {

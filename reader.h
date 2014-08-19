@@ -200,11 +200,11 @@ int reader_reading_interrupted();
 bool reader_thread_job_is_stale();
 
 /**
-   Read one line of input. Before calling this function, reader_push()
-   must have been called in order to set up a valid reader
-   environment.
+   Read one line of max nchars characters. If nchars<=0 read unlimited amount of
+   characters. Before calling this function, reader_push() must have been called
+   in order to set up a valid reader environment.
 */
-const wchar_t *reader_readline();
+const wchar_t *reader_readline(int nchars);
 
 /**
    Push a new reader environment.
